@@ -1,0 +1,87 @@
+# Python and Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environment
+venv/
+env/
+.venv/
+ENV/
+
+# Django specific
+*.sqlite3
+*.sqlite3-journal
+media/
+staticfiles/
+migrations/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Django secret keys and sensitive files
+*.key
+*.secret
+local_settings.py
+settings_local.py
+
+# Static and media files (if collected)
+static_root/
+media_root/
+
+# Development tools
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.bak
+*.swp
+*~
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Testing and coverage
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.pytest_cache/
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+*.egg
+
+# Package manager
+pip-wheel-metadata/
+Pipfile.lock
+
+# Miscellaneous
+*.bak
+*.gho
+*.ori
+*.orig
+*.tmp
