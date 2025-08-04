@@ -1,11 +1,21 @@
-
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Welcome, {{ user.username }}!</h2>
-  <p>This is your Pesa Plan dashboard.</p>
-  <p>You are logged in as {{ user.email }}.</p>
-  <form method="post" action="{% url 'accounts:logout' %}">
-    {% csrf_token %}
-    <button type="submit">Logout</button>
-  </form>
+  <h2>Dashboard</h2>
+  <p>Welcome, {{ user.username }}!</p>
+  <p>This is your financial planning dashboard. (Under construction)</p>
+  <a href="{% url 'accounts:logout' %}" class="btn">Logout</a>
+
+  <style>
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #dc3545;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .btn:hover {
+      background-color: #c82333;
+    }
+  </style>
 {% endblock %}
