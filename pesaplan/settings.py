@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'finance',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +123,17 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Authentication backend
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Login/logout redirects
+LOGIN_REDIRECT_URL = 'finance:dashboard'
+LOGOUT_REDIRECT_URL = 'accounts:login'
+
+# Ensure email field is unique
+AUTH_USER_MODEL = 'auth.User'  # Default, no custom user model
+
