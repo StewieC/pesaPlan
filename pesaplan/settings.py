@@ -53,6 +53,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'pesaplan.urls'
 
+AUTH_USER_MODEL = 'accounts.User'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -125,10 +127,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication backend
-AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailBackend',
-    'django.contrib.auth.backends.ModelBackend',
-]
+# AUTHENTICATION_BACKENDS = [
+#     'accounts.backends.EmailBackend',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
 
 # Login/logout redirects
 LOGIN_REDIRECT_URL = 'finance:dashboard'

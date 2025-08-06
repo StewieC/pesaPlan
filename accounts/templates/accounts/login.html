@@ -1,6 +1,6 @@
 {% extends 'finance/base.html' %}
 {% block content %}
-  <h2>Login</h2>
+  <h2>Login to Pesa Plan</h2>
   {% if messages %}
     {% for message in messages %}
       <p class="{{ message.tags }}">{{ message }}</p>
@@ -9,7 +9,33 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Login</button>
+    <button type="submit" class="btn">Login</button>
   </form>
   <p>Don't have an account? <a href="{% url 'accounts:signup' %}">Sign Up</a></p>
+
+  <style>
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    form {
+      max-width: 400px;
+      margin: 20px 0;
+    }
+    p.error {
+      color: red;
+    }
+    p.success {
+      color: green;
+    }
+  </style>
 {% endblock %}

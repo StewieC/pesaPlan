@@ -3,7 +3,9 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import SignUpForm, LoginForm
-from .backends import EmailBackend
+import logging
+
+logger = logging.getLogger(__name__)
 
 def signup_view(request):
     if request.method == 'POST':
@@ -12,7 +14,8 @@ def signup_view(request):
             user = form.save()
             login(request, user, backend='accounts.backends.EmailBackend')
             messages.success(request, 'Account created successfully!')
-            return redirect('finance:dashboard')  # Redirect to finance app dashboard
+            logger.info(f"User {user.username} signed up and logged in successfully")
+            return redirect('finance:dashboard')
         else:
             messages.error(request, 'Please correct the errors below.')
     else:
@@ -29,7 +32,7 @@ def login_view(request):
             if user is not None:
                 login(request, user, backend='accounts.backends.EmailBackend')
                 messages.success(request, 'Logged in successfully!')
-                return redirect('finance:dashboard')  # Redirect to finance app dashboard
+                return redirect('finance:dashboard')
             else:
                 messages.error(request, 'Invalid email or password.')
         else:
