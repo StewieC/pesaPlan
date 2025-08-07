@@ -1,0 +1,56 @@
+{% extends 'finance/base.html' %}
+{% load static %}
+{% block content %}
+  <h2>Budget for {{ budget.month }}</h2>
+  <p><strong>Total Budget:</strong> {{ budget.total_amount }} KSH</p>
+  <p><strong>Total Allocated:</strong> {{ total_allocated }} KSH</p>
+  <p><strong>Savings:</strong> {{ savings }} KSH</p>
+  {% if over_budget %}
+    <p class="error">Warning: Total allocations exceed budget!</p>
+  {% endif %}
+  {% if allocations %}
+    <h3>Allocations</h3>
+    <table>
+      <tr>
+        <th>Category</th>
+        <th>Amount (KSH)</th>
+      </tr>
+      {% for alloc in allocations %}
+        <tr>
+          <td>{{ alloc.category }}</td>
+          <td>{{ alloc.amount }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <canvas id="budgetChart" width="400" height="400"></canvas>
+  {% else %}
+    <p>No allocations yet.</p>
+  {% endif %}
+  <p>
+    <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn" style="background-color: #28a745;">Add Allocation</a>
+    <a href="{% url 'finance:dashboard' %}" class="btn" style="background-color: #007bff;">Back to Dashboard</a>
+  </p>
+
+  <script>
+    window.chartData = {
+      labels: {{ chart_data.labels|safe }},
+      data: {{ chart_data.data|safe }}
+    };
+  </script>
+  <script src="{% static 'js/script.js' %}"></script>
+
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th { background-color: #f2f2f2; }
+    canvas { max-width: 100%; }
+  </style>
+{% endblock %}

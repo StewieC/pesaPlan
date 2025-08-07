@@ -1,0 +1,28 @@
+{% extends 'finance/base.html' %}
+{% block content %}
+  <h2>Add Allocation to Budget ({{ budget.month }})</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div id="custom_category_field" style="display: none;">
+      {{ form.custom_category.label_tag }}
+      {{ form.custom_category }}
+    </div>
+    <button type="submit" class="btn" style="background-color: #28a745;">Add Allocation</button>
+  </form>
+  <p><a href="{% url 'finance:budget_detail' budget.pk %}">Back to Budget</a></p>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const categorySelect = document.querySelector('#id_category');
+      const customCategoryField = document.querySelector('#custom_category_field');
+      categorySelect.addEventListener('change', function() {
+        customCategoryField.style.display = this.value === 'Other' ? 'block' : 'none';
+      });
+    });
+  </script>
+
+  <style>
+    form { max-width: 400px; }
+  </style>
+{% endblock %}

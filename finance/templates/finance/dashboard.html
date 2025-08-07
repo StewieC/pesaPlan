@@ -2,20 +2,40 @@
 {% block content %}
   <h2>Dashboard</h2>
   <p>Welcome, {{ user.username }}!</p>
-  <p>This is your financial planning dashboard. (Under construction)</p>
-  <a href="{% url 'accounts:logout' %}" class="btn">Logout</a>
+  {% if budgets %}
+    <h3>Your Budgets</h3>
+    <table>
+      <tr>
+        <th>Month</th>
+        <th>Total Amount (KSH)</th>
+        <th>Actions</th>
+      </tr>
+      {% for budget in budgets %}
+        <tr>
+          <td>{{ budget.month }}</td>
+          <td>{{ budget.total_amount }}</td>
+          <td>
+            <a href="{% url 'finance:budget_detail' budget.pk %}" class="btn" style="background-color: #007bff;">View</a>
+            <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn" style="background-color: #28a745;">Add Allocation</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No budgets yet. <a href="{% url 'finance:budget_create' %}">Create your first budget</a>.</p>
+  {% endif %}
 
   <style>
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #dc3545;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
     }
-    .btn:hover {
-      background-color: #c82333;
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
     }
+    th { background-color: #f2f2f2; }
   </style>
 {% endblock %}

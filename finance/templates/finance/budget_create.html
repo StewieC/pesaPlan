@@ -1,0 +1,14 @@
+{% extends 'finance/base.html' %}
+{% block content %}
+  <h2>Create Budget</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn" style="background-color: #28a745;">Create Budget</button>
+  </form>
+  <p><a href="{% url 'finance:dashboard' %}">Back to Dashboard</a></p>
+
+  <style>
+    form { max-width: 400px; }
+  </style>
+{% endblock %}

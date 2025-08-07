@@ -139,3 +139,7 @@ LOGOUT_REDIRECT_URL = 'accounts:login'
 # Ensure email field is unique
 AUTH_USER_MODEL = 'auth.User'  # Default, no custom user model
 
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
