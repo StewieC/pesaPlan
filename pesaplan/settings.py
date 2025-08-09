@@ -137,7 +137,7 @@ LOGIN_REDIRECT_URL = 'finance:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
 # Ensure email field is unique
-AUTH_USER_MODEL = 'auth.User'  # Default, no custom user model
+AUTH_USER_MODEL = 'accounts.User'  # Default, no custom user model
 
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailBackend',
