@@ -7,34 +7,68 @@ PREDEFINED_CATEGORIES = [
     ('Transport', 'Transport'),
     ('Rent', 'Rent'),
     ('Entertainment', 'Entertainment'),
-    ('Other', 'Other (Specify)'),
+    ('Other', 'Other (Custom)'),
 ]
 
+MONTHS = [
+    ('01', 'January'),
+    ('02', 'February'),
+    ('03', 'March'),
+    ('04', 'April'),
+    ('05', 'May'),
+    ('06', 'June'),
+    ('07', 'July'),
+    ('08', 'August'),
+    ('09', 'September'),
+    ('10', 'October'),
+    ('11', 'November'),
+    ('12', 'December'),
+]
+
+YEARS = [(str(year), str(year)) for year in range(2020, 2031)]
+
 class BudgetForm(forms.ModelForm):
-    month = forms.CharField(
-        max_length=7,
-        help_text="Enter month in YYYY-MM format (e.g., 2025-08)",
-        widget=forms.TextInput(attrs={'placeholder': 'YYYY-MM'})
-    )
+    month_choice = forms.ChoiceField(choices=MONTHS, label="Month")
+    year_choice = forms.ChoiceField(choices=YEARS, label="Year")
+    total_amount = forms.DecimalField(min_value=0.01, decimal_places=2, label="Total Budget (KSH)")
 
     class Meta:
         model = Budget
         fields = ['month', 'total_amount']
         widgets = {
-            'total_amount': forms.NumberInput(attrs={'min': 0, 'step': 0.01}),
+            'month': forms.HiddenInput(),  # Hidden field to store YYYY-MM
+            'total_amount': forms.NumberInput(attrs={'min': 0.01, 'step': 0.01}),
         }
 
-    def clean_month(self):
-        month = self.cleaned_data['month']
-        if not month.match(r'^\d{4}-\d{2}$'):
-            raise ValidationError("Month must be in YYYY-MM format")
-        return month
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.month:
+            year, month = self.instance.month.split('-')
+            self.initial['year_choice'] = year
+            self.initial['month_choice'] = month
 
-    def clean_total_amount(self):
-        total_amount = self.cleaned_data['total_amount']
-        if total_amount <= 0:
-            raise ValidationError("Total amount must be positive")
-        return total_amount
+    def clean(self):
+        cleaned_data = super().clean()
+        month_choice = cleaned_data.get('month_choice')
+        year_choice = cleaned_data.get('year_choice')
+        total_amount = cleaned_data.get('total_amount')
+
+        if month_choice and year_choice:
+            cleaned_data['month'] = f"{year_choice}-{month_choice}"
+        else:
+            raise ValidationError("Please select both a month and a year.")
+
+        if total_amount is not None and total_amount <= 0:
+            raise ValidationError("Total amount must be positive.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.month = self.cleaned_data['month']
+        if commit:
+            instance.save()
+        return instance
 
 class AllocationForm(forms.ModelForm):
     category = forms.ChoiceField(choices=PREDEFINED_CATEGORIES, required=True)
@@ -60,7 +94,7 @@ class AllocationForm(forms.ModelForm):
         if category == 'Other' and not custom_category:
             raise ValidationError("Please specify a custom category when selecting 'Other'")
         if category != 'Other' and custom_category:
-            cleaned_data['custom_category'] = ''  # Ignore custom_category if not 'Other'
+            cleaned_data['custom_category'] = ''
 
         if amount and amount <= 0:
             raise ValidationError("Amount must be positive")

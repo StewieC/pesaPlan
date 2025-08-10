@@ -13,7 +13,7 @@ class Budget(models.Model):
         return f"{self.user.username}'s Budget for {self.month}"
 
     class Meta:
-        unique_together = ('user', 'month')  # Prevent duplicate budgets for same user/month
+        unique_together = ('user', 'month')
 
 class Allocation(models.Model):
     budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='allocations')

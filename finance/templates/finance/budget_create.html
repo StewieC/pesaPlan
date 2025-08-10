@@ -1,14 +1,64 @@
 {% extends 'finance/base.html' %}
+{% load static %}
 {% block content %}
   <h2>Create Budget</h2>
   <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
+    {{ form.month }} <!-- Hidden input for YYYY-MM -->
+    <div class="form-group">
+      <label for="{{ form.month_choice.id_for_label }}">Month</label>
+      {{ form.month_choice }}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.year_choice.id_for_label }}">Year</label>
+      {{ form.year_choice }}
+    </div>
+    <div class="form-group">
+      <label for="{{ form.total_amount.id_for_label }}">Total Budget (KSH)</label>
+      {{ form.total_amount }}
+    </div>
+    {% if form.errors %}
+      <p class="error">
+        {% for field in form %}
+          {% for error in field.errors %}
+            {{ error }}<br>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          {{ error }}<br>
+        {% endfor %}
+      </p>
+    {% endif %}
     <button type="submit" class="btn" style="background-color: #28a745;">Create Budget</button>
   </form>
   <p><a href="{% url 'finance:dashboard' %}">Back to Dashboard</a></p>
 
   <style>
-    form { max-width: 400px; }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    select, input[type="number"] {
+      width: 100%;
+      max-width: 400px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    form {
+      max-width: 400px;
+    }
+    .error {
+      color: red;
+      font-size: 14px;
+    }
+    @media (max-width: 600px) {
+      select, input[type="number"] {
+        font-size: 16px;
+      }
+    }
   </style>
 {% endblock %}
