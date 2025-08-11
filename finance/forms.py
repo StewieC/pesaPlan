@@ -46,6 +46,9 @@ class BudgetForm(forms.ModelForm):
             year, month = self.instance.month.split('-')
             self.initial['year_choice'] = year
             self.initial['month_choice'] = month
+        # Ensure hidden month field is present in initial data
+        if not self.data and not self.instance.month:
+            self.initial['month'] = ''
 
     def clean(self):
         cleaned_data = super().clean()
@@ -53,10 +56,13 @@ class BudgetForm(forms.ModelForm):
         year_choice = cleaned_data.get('year_choice')
         total_amount = cleaned_data.get('total_amount')
 
+        if not month_choice or not year_choice:
+            raise ValidationError("Please select both a month and a year.")
+        
         if month_choice and year_choice:
             cleaned_data['month'] = f"{year_choice}-{month_choice}"
         else:
-            raise ValidationError("Please select both a month and a year.")
+            cleaned_data['month'] = ''  # Default to empty if invalid
 
         if total_amount is not None and total_amount <= 0:
             raise ValidationError("Total amount must be positive.")
@@ -65,7 +71,8 @@ class BudgetForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        instance.month = self.cleaned_data['month']
+        if self.cleaned_data.get('month'):
+            instance.month = self.cleaned_data['month']
         if commit:
             instance.save()
         return instance

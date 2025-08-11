@@ -22,7 +22,7 @@ class BudgetCreateView(CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         response = super().form_valid(form)
-        messages.success(self.request, f"Budget for {form.instance.month} created successfully!")
+        messages.success(self.request, "Budget created! Now add allocations.")
         logger.info(f"User {self.request.user.username} created budget for {form.instance.month}")
         return response
 
@@ -42,7 +42,7 @@ class AllocationCreateView(CreateView):
     def form_valid(self, form):
         form.instance.budget = get_object_or_404(Budget, pk=self.kwargs['budget_id'], user=self.request.user)
         response = super().form_valid(form)
-        messages.success(self.request, f"Allocated {form.instance.amount} KSH to {form.instance.category}")
+        messages.success(self.request, "Allocation added! Check your distribution.")
         logger.info(f"User {self.request.user.username} allocated {form.instance.amount} KSH to {form.instance.category}")
         return response
 
@@ -65,7 +65,6 @@ class BudgetDetailView(DetailView):
         context['total_allocated'] = total_allocated
         context['savings'] = savings
         context['over_budget'] = total_allocated > self.object.total_amount
-        # Data for Chart.js
         context['chart_data'] = {
             'labels': [alloc.category for alloc in allocations] + (['Savings'] if savings > 0 else []),
             'data': [float(alloc.amount) for alloc in allocations] + ([float(savings)] if savings > 0 else []),
