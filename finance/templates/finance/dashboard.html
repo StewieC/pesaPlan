@@ -1,59 +1,48 @@
 {% extends 'finance/base.html' %}
 {% block content %}
-  <h2>Dashboard</h2>
-  <p>Welcome, {{ user.username }}!</p>
-  {% if latest_budget %}
-    <div class="summary-card">
-      <h3>Current Budget Summary ({{ latest_budget.month }})</h3>
-      <p>Total Budget: {{ latest_budget.total_amount }} KSH</p>
-      <p>Allocated: {{ total_allocated }} KSH</p>
-      <p>Savings: {{ savings }} KSH</p>
-      {% if savings < 0 %}
-  <p class="error">Over Budget by {{ over_budget_amount }} KSH!</p>
-      {% endif %}
-    </div>
-  {% else %}
-    <p>No budgets yet. <a href="{% url 'finance:budget_create' %}">Create your first budget</a>.</p>
-  {% endif %}
-  {% if budgets %}
-    <h3>Your Budgets</h3>
-    <table>
-      <tr>
-        <th>Month</th>
-        <th>Total Amount (KSH)</th>
-        <th>Actions</th>
-      </tr>
-      {% for budget in budgets %}
-        <tr>
-          <td>{{ budget.month }}</td>
-          <td>{{ budget.total_amount }}</td>
-          <td>
-            <a href="{% url 'finance:budget_detail' budget.pk %}" class="btn" style="background-color: #007bff;">View</a>
-            <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn" style="background-color: #28a745;">Add Allocation</a>
-          </td>
-        </tr>
-      {% endfor %}
-    </table>
-  {% endif %}
+    <h2>Dashboard</h2>
+    <p>Welcome, {{ user.username }}!</p>
 
-  <style>
-    .summary-card {
-      border: 1px solid #ddd;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      background-color: #f9f9f9;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    th { background-color: #f2f2f2; }
-  </style>
+    {% if latest_budget %}
+        <div class="card">
+            <h3>Current Budget Summary ({{ latest_budget.month|date:"F Y" }})</h3>
+            <p><strong>Total Budget:</strong> {{ latest_budget.total_amount }} KSH</p>
+            <p><strong>Allocated:</strong> {{ total_allocated }} KSH</p>
+            <p><strong>Savings:</strong> {{ savings }} KSH</p>
+            {% if savings < 0 %}
+                <div class="message error">Over Budget by {{ over_budget_amount }} KSH!</div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="card">
+            <p>No budgets yet. <a href="{% url 'finance:budget_create' %}">Create your first budget now!</a></p>
+        </div>
+    {% endif %}
+
+    {% if budgets %}
+        <div class="card">
+            <h3>Your Budgets</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Total Amount (KSH)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for budget in budgets %}
+                        <tr>
+                            <td>{{ budget.month|date:"F Y" }}</td>
+                            <td>{{ budget.total_amount }}</td>
+                            <td>
+                                <a href="{% url 'finance:budget_detail' budget.pk %}" class="btn btn-secondary">View</a>
+                                <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn">Add Allocation</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
 {% endblock %}

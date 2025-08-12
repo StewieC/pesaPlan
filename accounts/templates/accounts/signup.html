@@ -1,41 +1,11 @@
 {% extends 'finance/base.html' %}
 {% block content %}
-  <h2>Sign Up for Pesa Plan</h2>
-  {% if messages %}
-    {% for message in messages %}
-      <p class="{{ message.tags }}">{{ message }}</p>
-    {% endfor %}
-  {% endif %}
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn">Sign Up</button>
-  </form>
-  <p>Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
-
-  <style>
-    .btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      text-decoration: none;
-      border-radius: 5px;
-      border: none;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background-color: #218838;
-    }
-    form {
-      max-width: 400px;
-      margin: 20px 0;
-    }
-    p.error {
-      color: red;
-    }
-    p.success {
-      color: green;
-    }
-  </style>
+<div class="card" style="max-width: 450px; margin: 40px auto;">
+    <h2>Sign Up for Pesa Plan</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}  <button type="submit" class="btn">Sign Up</button>
+    </form>
+    <p style="margin-top: 20px;">Already have an account? <a href="{% url 'accounts:login' %}">Login</a></p>
+</div>
 {% endblock %}

@@ -1,60 +1,59 @@
 {% extends 'finance/base.html' %}
 {% block content %}
-  <h2>Budget for {{ budget.month }}</h2>
-  <p><strong>Total Budget:</strong> {{ budget.total_amount }} KSH</p>
-  <p><strong>Total Allocated:</strong> {{ total_allocated }} KSH</p>
-  <p><strong>Savings:</strong> {{ savings }} KSH</p>
-  {% if over_budget %}
-  <p class="error">Alert: You've allocated more than your budget! Adjust to save {{ over_budget_amount }} KSH.</p>
-  {% elif near_limit %}
-    <p class="warning">Warning: You're over 80% of your budget! Consider reducing allocations.</p>
-  {% elif savings > 0 %}
-    <p class="success">Great! You have {{ savings }} KSH left for savings.</p>
-  {% endif %}
-  {% if allocations %}
-    <h3>Allocations</h3>
-    <table>
-      <tr>
-        <th>Category</th>
-        <th>Amount (KSH)</th>
-      </tr>
-      {% for alloc in allocations %}
-        <tr>
-          <td>{{ alloc.category }}</td>
-          <td>{{ alloc.amount }}</td>
-        </tr>
-      {% endfor %}
-    </table>
-    <canvas id="budgetChart" width="400" height="400"></canvas>
-  {% else %}
-    <p>No allocations yet.</p>
-  {% endif %}
-  <p>
-    <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn" style="background-color: #28a745;">Add Allocation</a>
-    <a href="{% url 'finance:dashboard' %}" class="btn" style="background-color: #007bff;">Back to Dashboard</a>
-  </p>
+    <h2>Budget for {{ budget.month|date:"F Y" }}</h2>
+    <div class="card">
+        <p><strong>Total Budget:</strong> {{ budget.total_amount }} KSH</p>
+        <p><strong>Total Allocated:</strong> {{ total_allocated }} KSH</p>
+        <p><strong>Savings:</strong> {{ savings }} KSH</p>
 
-  <script>
-    window.chartData = {
-      labels: {{ chart_data.labels|safe }},
-      data: {{ chart_data.data|safe }}
-    };
-  </script>
+        {% if over_budget %}
+            <p class="message error">Alert: You've allocated more than your budget! Adjust to save {{ over_budget_amount }} KSH.</p>
+        {% elif near_limit %}
+            <p class="message warning">Warning: You're over 80% of your budget! Consider reducing allocations.</p>
+        {% elif savings > 0 %}
+            <p class="message success">Great! You have {{ savings }} KSH left for savings.</p>
+        {% endif %}
+    </div>
 
+    {% if allocations %}
+        <div class="card">
+            <h3>Allocations</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Amount (KSH)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alloc in allocations %}
+                        <tr>
+                            <td>{{ alloc.category }}</td>
+                            <td>{{ alloc.amount }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    th { background-color: #f2f2f2; }
-    canvas { max-width: 100%; }
-    .warning { color: #ff9800; font-weight: bold; }
-  </style>
+        <div id="chart-container">
+            <canvas id="budgetChart"></canvas>
+        </div>
+    {% else %}
+        <div class="card">
+            <p>No allocations yet. Add one to get started!</p>
+        </div>
+    {% endif %}
+
+    <p style="margin-top: 20px;">
+        <a href="{% url 'finance:allocation_create' budget.pk %}" class="btn">Add Allocation</a>
+        <a href="{% url 'finance:dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </p>
+
+    <script>
+        window.chartData = {
+            labels: {{ chart_data.labels|safe }},
+            data: {{ chart_data.data|safe }}
+        };
+    </script>
 {% endblock %}

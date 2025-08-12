@@ -1,28 +1,38 @@
 {% extends 'finance/base.html' %}
 {% block content %}
-  <h2>Add Allocation to Budget ({{ budget.month }})</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div id="custom_category_field" style="display: none;">
-      {{ form.custom_category.label_tag }}
-      {{ form.custom_category }}
-    </div>
-    <button type="submit" class="btn" style="background-color: #28a745;">Add Allocation</button>
-  </form>
-  <p><a href="{% url 'finance:budget_detail' budget.pk %}">Back to Budget</a></p>
+<div class="card" style="max-width: 500px; margin: auto;">
+    <h2>Add Allocation to Budget ({{ budget.month|date:"F Y" }})</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div id="custom_category_field" style="display: none;" class="form-group">
+            <label for="{{ form.custom_category.id_for_label }}">{{ form.custom_category.label }}</label>
+            {{ form.custom_category }}
+        </div>
+        <button type="submit" class="btn">Add Allocation</button>
+    </form>
+    <p style="margin-top:20px;"><a href="{% url 'finance:budget_detail' budget.pk %}">Back to Budget</a></p>
+</div>
 
-  <script>
+<script>
     document.addEventListener('DOMContentLoaded', function() {
-      const categorySelect = document.querySelector('#id_category');
-      const customCategoryField = document.querySelector('#custom_category_field');
-      categorySelect.addEventListener('change', function() {
-        customCategoryField.style.display = this.value === 'Other' ? 'block' : 'none';
-      });
-    });
-  </script>
+        const categorySelect = document.querySelector('#id_category');
+        const customCategoryField = document.querySelector('#custom_category_field');
+        
+        // Function to check the value
+        const toggleCustomCategory = () => {
+            if (categorySelect.value === 'Other') {
+                customCategoryField.style.display = 'block';
+            } else {
+                customCategoryField.style.display = 'none';
+            }
+        };
 
-  <style>
-    form { max-width: 400px; }
-  </style>
+        // Initial check in case the form is re-rendered with 'Other' selected
+        toggleCustomCategory(); 
+
+        // Add event listener
+        categorySelect.addEventListener('change', toggleCustomCategory);
+    });
+</script>
 {% endblock %}
