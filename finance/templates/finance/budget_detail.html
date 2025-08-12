@@ -1,12 +1,15 @@
 {% extends 'finance/base.html' %}
-{% load static %}
 {% block content %}
   <h2>Budget for {{ budget.month }}</h2>
   <p><strong>Total Budget:</strong> {{ budget.total_amount }} KSH</p>
   <p><strong>Total Allocated:</strong> {{ total_allocated }} KSH</p>
   <p><strong>Savings:</strong> {{ savings }} KSH</p>
   {% if over_budget %}
-    <p class="error">Warning: Total allocations exceed budget!</p>
+  <p class="error">Alert: You've allocated more than your budget! Adjust to save {{ over_budget_amount }} KSH.</p>
+  {% elif near_limit %}
+    <p class="warning">Warning: You're over 80% of your budget! Consider reducing allocations.</p>
+  {% elif savings > 0 %}
+    <p class="success">Great! You have {{ savings }} KSH left for savings.</p>
   {% endif %}
   {% if allocations %}
     <h3>Allocations</h3>
@@ -37,7 +40,7 @@
       data: {{ chart_data.data|safe }}
     };
   </script>
-  <script src="{% static 'js/script.js' %}"></script>
+
 
   <style>
     table {
@@ -52,5 +55,6 @@
     }
     th { background-color: #f2f2f2; }
     canvas { max-width: 100%; }
+    .warning { color: #ff9800; font-weight: bold; }
   </style>
 {% endblock %}

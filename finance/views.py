@@ -12,7 +12,19 @@ logger = logging.getLogger(__name__)
 @login_required
 def dashboard_view(request):
     budgets = Budget.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'finance/dashboard.html', {'budgets': budgets})
+    latest_budget = budgets.first() if budgets.exists() else None
+    context = {'budgets': budgets}
+    if latest_budget:
+        total_allocated = sum(alloc.amount for alloc in latest_budget.allocations.all())
+        savings = latest_budget.total_amount - total_allocated
+        over_budget_amount = abs(savings) if savings < 0 else 0
+        context.update({
+            'latest_budget': latest_budget,
+            'total_allocated': total_allocated,
+            'savings': savings,
+            'over_budget_amount': over_budget_amount,
+        })
+    return render(request, 'finance/dashboard.html', context)
 
 class BudgetCreateView(CreateView):
     model = Budget
@@ -69,6 +81,8 @@ class BudgetDetailView(DetailView):
         context['total_allocated'] = total_allocated
         context['savings'] = savings
         context['over_budget'] = total_allocated > self.object.total_amount
+        context['near_limit'] = total_allocated / self.object.total_amount > 0.8 if self.object.total_amount > 0 else False
+        context['over_budget_amount'] = abs(savings) if savings < 0 else 0  # Calculate absolute value here
         context['chart_data'] = {
             'labels': [alloc.category for alloc in allocations] + (['Savings'] if savings > 0 else []),
             'data': [float(alloc.amount) for alloc in allocations] + ([float(savings)] if savings > 0 else []),
