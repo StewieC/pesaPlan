@@ -34,9 +34,8 @@ class BudgetForm(forms.ModelForm):
 
     class Meta:
         model = Budget
-        fields = ['month', 'total_amount']
+        fields = ['total_amount']  # Remove 'month' from fields, as it's derived
         widgets = {
-            'month': forms.HiddenInput(),  # Hidden field to store YYYY-MM
             'total_amount': forms.NumberInput(attrs={'min': 0.01, 'step': 0.01}),
         }
 
@@ -46,9 +45,8 @@ class BudgetForm(forms.ModelForm):
             year, month = self.instance.month.split('-')
             self.initial['year_choice'] = year
             self.initial['month_choice'] = month
-        # Ensure hidden month field is present in initial data
-        if not self.data and not self.instance.month:
-            self.initial['month'] = ''
+        # Add hidden month field dynamically
+        self.fields['month'] = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     def clean(self):
         cleaned_data = super().clean()
@@ -59,10 +57,7 @@ class BudgetForm(forms.ModelForm):
         if not month_choice or not year_choice:
             raise ValidationError("Please select both a month and a year.")
         
-        if month_choice and year_choice:
-            cleaned_data['month'] = f"{year_choice}-{month_choice}"
-        else:
-            cleaned_data['month'] = ''  # Default to empty if invalid
+        cleaned_data['month'] = f"{year_choice}-{month_choice}"
 
         if total_amount is not None and total_amount <= 0:
             raise ValidationError("Total amount must be positive.")
@@ -71,8 +66,7 @@ class BudgetForm(forms.ModelForm):
 
     def save(self, commit=True):
         instance = super().save(commit=False)
-        if self.cleaned_data.get('month'):
-            instance.month = self.cleaned_data['month']
+        instance.month = self.cleaned_data['month']
         if commit:
             instance.save()
         return instance
