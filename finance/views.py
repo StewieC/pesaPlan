@@ -39,16 +39,20 @@ class AllocationCreateView(CreateView):
         kwargs['budget'] = get_object_or_404(Budget, pk=self.kwargs['budget_id'], user=self.request.user)
         return kwargs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['budget'] = get_object_or_404(Budget, pk=self.kwargs['budget_id'], user=self.request.user)
+        return context
+
     def form_valid(self, form):
         form.instance.budget = get_object_or_404(Budget, pk=self.kwargs['budget_id'], user=self.request.user)
         response = super().form_valid(form)
-        messages.success(self.request, "Allocation added! Check your distribution.")
+        messages.success(self.request, f"Allocated {form.instance.amount} KSH to {form.instance.category}")
         logger.info(f"User {self.request.user.username} allocated {form.instance.amount} KSH to {form.instance.category}")
         return response
 
     def get_success_url(self):
         return reverse('finance:budget_detail', kwargs={'pk': self.kwargs['budget_id']})
-
 class BudgetDetailView(DetailView):
     model = Budget
     template_name = 'finance/budget_detail.html'
