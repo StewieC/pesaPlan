@@ -25,9 +25,10 @@ SECRET_KEY = 'django-insecure-3s+p2$6lfn2z5)-tf0ovs3has2b67q77&j471^^(r6c@c+7(y)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS = ['StewieC.pythonanywhere.com', '127.0.0.1', 'localhost']
+
+# Hosts/domain names that are valid for this site; required if DEBUG is False
 ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
