@@ -231,3 +231,18 @@ input:focus, select:focus {
     margin-bottom: 10px;
   }
 }
+
+/* ... existing styles ... */
+
+/* Total Income Display */
+#total-income {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+#total-amount {
+    font-weight: bold;
+    color: var(--dark-blue);
+}

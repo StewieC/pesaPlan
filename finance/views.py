@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 from django.views.generic import CreateView, DetailView
 from django.contrib import messages
-from .models import Budget, Allocation
-from .forms import BudgetForm, AllocationForm
+from django.urls import reverse
 import logging
+
+from .models import Budget, IncomeSource, Allocation  # Add Allocation to the import
+from .forms import IncomeForm, BudgetForm, AllocationForm  # Import IncomeForm, BudgetForm, and AllocationForm
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,33 @@ def dashboard_view(request):
         })
     return render(request, 'finance/dashboard.html', context)
 
+class IncomeCreateView(CreateView):
+    model = IncomeSource
+    form_class = IncomeForm
+    template_name = 'finance/income_create.html'
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        response = super().form_valid(form)
+        messages.success(self.request, f"Added income from {form.instance.source} of {form.instance.amount} KSH.")
+        return response
+
+    def get_success_url(self):
+        # Calculate total income for this user and redirect to budget creation
+        total_income = sum(income.amount for income in IncomeSource.objects.filter(user=self.request.user))
+        return reverse('finance:budget_create') + f'?suggested_amount={total_income}'
+
 class BudgetCreateView(CreateView):
     model = Budget
     form_class = BudgetForm
     template_name = 'finance/budget_create.html'
+
+    def get_initial(self):
+        initial = super().get_initial()
+        suggested_amount = self.request.GET.get('suggested_amount')
+        if suggested_amount:
+            initial['total_amount'] = float(suggested_amount)
+        return initial
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -65,6 +89,7 @@ class AllocationCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('finance:budget_detail', kwargs={'pk': self.kwargs['budget_id']})
+
 class BudgetDetailView(DetailView):
     model = Budget
     template_name = 'finance/budget_detail.html'
@@ -82,9 +107,19 @@ class BudgetDetailView(DetailView):
         context['savings'] = savings
         context['over_budget'] = total_allocated > self.object.total_amount
         context['near_limit'] = total_allocated / self.object.total_amount > 0.8 if self.object.total_amount > 0 else False
-        context['over_budget_amount'] = abs(savings) if savings < 0 else 0  # Calculate absolute value here
+        context['over_budget_amount'] = abs(savings) if savings < 0 else 0
         context['chart_data'] = {
             'labels': [alloc.category for alloc in allocations] + (['Savings'] if savings > 0 else []),
             'data': [float(alloc.amount) for alloc in allocations] + ([float(savings)] if savings > 0 else []),
         }
         return context
+    
+    
+    
+    
+from django.http import JsonResponse
+
+@login_required
+def get_total_income(request):
+    total = sum(income.amount for income in IncomeSource.objects.filter(user=request.user))
+    return JsonResponse({'total': total if total > 0 else 0})

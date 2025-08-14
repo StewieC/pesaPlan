@@ -1,0 +1,57 @@
+{% extends 'finance/base.html' %}
+{% block content %}
+<div class="card" style="max-width: 500px; margin: auto;">
+    <h2>Add Income Source</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if form.errors %}
+            <div class="message error">
+                {% for field in form %}
+                    {% for error in field.errors %}{{ error }}<br>{% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}{{ error }}<br>{% endfor %}
+            </div>
+        {% endif %}
+        <button type="submit" class="btn">Add Income</button>
+    </form>
+    <p style="margin-top: 20px;">
+        <a href="#" class="btn btn-secondary" id="view-total">View Total Income</a>
+        <a href="{% url 'finance:budget_create' %}" class="btn" style="margin-left: 10px;">Proceed to Budget</a>
+    </p>
+
+    <div id="total-income" style="display: none; margin-top: 20px;">
+        <h3>Total Income</h3>
+        <p id="total-amount"></p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewTotalBtn = document.getElementById('view-total');
+            const totalIncomeDiv = document.getElementById('total-income');
+            const totalAmountP = document.getElementById('total-amount');
+
+            viewTotalBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                fetch('/get-total-income/', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.total) {
+                        totalAmountP.textContent = `${data.total} KSH`;
+                        totalIncomeDiv.style.display = 'block';
+                    } else {
+                        totalAmountP.textContent = 'No income recorded yet.';
+                        totalIncomeDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+</div>
+{% endblock %}

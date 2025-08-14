@@ -1,52 +1,32 @@
 from django import forms
-from django.core.exceptions import ValidationError
-from .models import Budget, Allocation
+from .models import Budget, Allocation, IncomeSource
 
-PREDEFINED_CATEGORIES = [
-    ('Food', 'Food'),
-    ('Transport', 'Transport'),
-    ('Rent', 'Rent'),
-    ('Entertainment', 'Entertainment'),
-    ('Other', 'Other (Custom)'),
-]
-
-MONTHS = [
-    ('01', 'January'),
-    ('02', 'February'),
-    ('03', 'March'),
-    ('04', 'April'),
-    ('05', 'May'),
-    ('06', 'June'),
-    ('07', 'July'),
-    ('08', 'August'),
-    ('09', 'September'),
-    ('10', 'October'),
-    ('11', 'November'),
-    ('12', 'December'),
-]
-
-YEARS = [(str(year), str(year)) for year in range(2020, 2031)]
+class IncomeForm(forms.ModelForm):
+    class Meta:
+        model = IncomeSource
+        fields = ['source', 'amount']
 
 class BudgetForm(forms.ModelForm):
-    month_choice = forms.ChoiceField(choices=MONTHS, label="Month")
-    year_choice = forms.ChoiceField(choices=YEARS, label="Year")
+    month_choice = forms.ChoiceField(choices=[(f"{i:02d}", month) for i, month in enumerate([
+        'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+        'September', 'October', 'November', 'December'], 1)], label="Month")
+    year_choice = forms.ChoiceField(choices=[(str(year), str(year)) for year in range(2020, 2031)], label="Year")
     total_amount = forms.DecimalField(min_value=0.01, decimal_places=2, label="Total Budget (KSH)")
 
     class Meta:
         model = Budget
-        fields = ['total_amount']  # Remove 'month' from fields, as it's derived
+        fields = ['total_amount']
         widgets = {
             'total_amount': forms.NumberInput(attrs={'min': 0.01, 'step': 0.01}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['month'] = forms.CharField(widget=forms.HiddenInput(), required=False)
         if self.instance and self.instance.month:
             year, month = self.instance.month.split('-')
             self.initial['year_choice'] = year
-            self.initial['month_choice'] = month
-        # Add hidden month field dynamically
-        self.fields['month'] = forms.CharField(widget=forms.HiddenInput(), required=False)
+            self.initial['month_choice'] = f"{int(month):02d}"
 
     def clean(self):
         cleaned_data = super().clean()
@@ -55,12 +35,12 @@ class BudgetForm(forms.ModelForm):
         total_amount = cleaned_data.get('total_amount')
 
         if not month_choice or not year_choice:
-            raise ValidationError("Please select both a month and a year.")
+            raise forms.ValidationError("Please select both a month and a year.")
         
-        cleaned_data['month'] = f"{year_choice}-{month_choice}"
+        cleaned_data['month'] = f"{year_choice}-{month_choice.zfill(2)}"
 
         if total_amount is not None and total_amount <= 0:
-            raise ValidationError("Total amount must be positive.")
+            raise forms.ValidationError("Total amount must be positive.")
 
         return cleaned_data
 
@@ -72,7 +52,10 @@ class BudgetForm(forms.ModelForm):
         return instance
 
 class AllocationForm(forms.ModelForm):
-    category = forms.ChoiceField(choices=PREDEFINED_CATEGORIES, required=True)
+    category = forms.ChoiceField(choices=[
+        ('Food', 'Food'), ('Transport', 'Transport'), ('Rent', 'Rent'),
+        ('Entertainment', 'Entertainment'), ('Other', 'Other (Custom)'),
+    ], required=True)
     custom_category = forms.CharField(max_length=50, required=False, help_text="Enter custom category if 'Other' is selected")
 
     class Meta:
@@ -93,17 +76,17 @@ class AllocationForm(forms.ModelForm):
         amount = cleaned_data.get('amount')
 
         if category == 'Other' and not custom_category:
-            raise ValidationError("Please specify a custom category when selecting 'Other'")
+            raise forms.ValidationError("Please specify a custom category when selecting 'Other'")
         if category != 'Other' and custom_category:
             cleaned_data['custom_category'] = ''
 
         if amount and amount <= 0:
-            raise ValidationError("Amount must be positive")
+            raise forms.ValidationError("Amount must be positive")
 
         if self.budget and amount:
             total_allocated = sum(alloc.amount for alloc in self.budget.allocations.all())
             if total_allocated + amount > self.budget.total_amount:
-                raise ValidationError(f"Total allocations ({total_allocated + amount} KSH) exceed budget ({self.budget.total_amount} KSH)")
+                raise forms.ValidationError(f"Total allocations ({total_allocated + amount} KSH) exceed budget ({self.budget.total_amount} KSH)")
 
         return cleaned_data
 
